@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageLabelingPage extends StatefulWidget {
@@ -18,8 +18,6 @@ class _ImageLabelingPageState extends State<ImageLabelingPage> {
   XFile? imageFile;
 
   String imageLabel = "";
-
-  final List<BarcodeFormat> formats = [BarcodeFormat.all];
 
   Future<void> getImage(ImageSource source) async {
     try {

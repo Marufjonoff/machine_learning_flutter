@@ -1,9 +1,7 @@
 import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
 
 class TextRecognitionPage extends StatefulWidget {
@@ -49,7 +47,8 @@ class _TextRecognitionPageState extends State<TextRecognitionPage> {
 
   Future<void> getRecognisedText(XFile image) async {
     final inputImage = InputImage.fromFilePath(image.path);
-    final textDetector = GoogleMlKit.vision.textRecognizer();
+    // final textDetector = GoogleMlKit.vision.textRecognizer();
+    final textDetector = TextRecognizer(script: TextRecognitionScript.latin);
     RecognizedText recognizedText = await textDetector.processImage(inputImage);
     await textDetector.close();
     scannedText = "";

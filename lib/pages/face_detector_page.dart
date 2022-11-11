@@ -1,9 +1,8 @@
-import 'dart:io';
-import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:image_picker/image_picker.dart';
 
 class FaceDetectorPage extends StatefulWidget {
@@ -21,18 +20,16 @@ class _FaceDetectorPageState extends State<FaceDetectorPage> {
   String result = "";
 
   List<Rect> rect = <Rect>[];
-  late final Image image;
+  late final ui.Image imageUi;
 
   Future<void> getImage(ImageSource source) async {
     try {
       final pickedImage = await ImagePicker().pickImage(source: source);
 
       if (pickedImage != null) {
-        print("object 1");
-        Uint8List uint8list = (await pickedImage.readAsBytes());
-        image = Image.memory(uint8list);
+        Uint8List utList = (await pickedImage.readAsBytes());
+        imageUi = await decodeImageFromList(utList);
 
-        print("object 2");
         imageFile = pickedImage;
         setState(() {});
         detectFace(pickedImage);
@@ -59,45 +56,14 @@ class _FaceDetectorPageState extends State<FaceDetectorPage> {
     }
 
     for (Face face in faces) {
-      print(face.boundingBox);
       rect.add(face.boundingBox);
     }
+
+    faceDetector.close();
 
     setState(() {
       faceDetecting = true;
     });
-  }
-
-  Future<void> detectingFace(XFile image) async {
-    final options = FaceDetectorOptions();
-    final faceDetector = FaceDetector(options: options);
-
-    final List<Face> faces = await faceDetector.processImage(InputImage.fromFilePath(image.path));
-
-    for (Face face in faces) {
-      final Rect boundingBox = face.boundingBox;
-
-      final double? rotX = face.headEulerAngleX; // Head is tilted up and down rotX degrees
-      final double? rotY = face.headEulerAngleY; // Head is rotated to the right rotY degrees
-      final double? rotZ = face.headEulerAngleZ; // Head is tilted sideways rotZ degrees
-
-      // If landmark detection was enabled with FaceDetectorOptions (mouth, ears,
-      // eyes, cheeks, and nose available):
-      final FaceLandmark? leftEar = face.landmarks[FaceLandmarkType.leftEar];
-      if (leftEar != null) {
-        final Point<int> leftEarPos = leftEar.position;
-      }
-
-      // If classification was enabled with FaceDetectorOptions:
-      if (face.smilingProbability != null) {
-        final double? smileProb = face.smilingProbability;
-      }
-
-      // If face tracking was enabled with FaceDetectorOptions:
-      if (face.trackingId != null) {
-        final int? id = face.trackingId;
-      }
-    }
   }
 
   @override
@@ -155,15 +121,11 @@ class _FaceDetectorPageState extends State<FaceDetectorPage> {
                   color: Colors.deepPurple),
             ),
           if (faceDetecting && imageFile != null)
-            Center(
-              child: FittedBox(
-                child: SizedBox(
-                       width: Image.file(File(imageFile!.path)).width,
-                       height: Image.file(File(imageFile!.path)).width,
-                  child: CustomPaint(
-                    painter:
-                    FacePainter(rect: rect, imageFile: image),
-                  ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                child: CustomPaint(
+                  painter: FacePainter(rect: rect, imageFile: imageUi),
                 ),
               ),
             ),
@@ -173,16 +135,17 @@ class _FaceDetectorPageState extends State<FaceDetectorPage> {
     );
   }
 }
+
 class FacePainter extends CustomPainter {
   List<Rect> rect;
-  var imageFile;
+  ui.Image? imageFile;
 
   FacePainter({required this.rect, required this.imageFile});
 
   @override
   void paint(Canvas canvas, Size size) {
     if (imageFile != null) {
-      canvas.drawImage(imageFile, Offset.zero, Paint());
+      canvas.drawImage(imageFile!, Offset.zero, Paint());
     }
 
     for (Rect rectangle in rect) {
