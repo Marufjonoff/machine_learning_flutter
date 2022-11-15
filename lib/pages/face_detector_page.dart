@@ -75,7 +75,7 @@ class _FaceDetectorPageState extends State<FaceDetectorPage> {
         elevation: 0,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(5),
-          child: faceDetecting
+          child: !faceDetecting
               ? const LinearProgressIndicator()
               : const SizedBox.shrink(),
         ),
@@ -121,9 +121,10 @@ class _FaceDetectorPageState extends State<FaceDetectorPage> {
                   color: Colors.deepPurple),
             ),
           if (faceDetecting && imageFile != null)
-            Align(
-              alignment: Alignment.centerLeft,
+            FittedBox(
               child: SizedBox(
+                width: imageUi.width.toDouble(),
+                height: imageUi.height.toDouble(),
                 child: CustomPaint(
                   painter: FacePainter(rect: rect, imageFile: imageUi),
                 ),
